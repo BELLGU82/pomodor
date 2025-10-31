@@ -5,372 +5,58 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pomodoro Timer</title>
   <style>
-    :root {
-      --bg: #ffffff;
-      --panel: #f2f2f2;
-      --accent: #0d9488;
-      --text: #1f2933;
-      --muted: #9ca3af;
-      --radius: 14px;
-    }
-    * { box-sizing: border-box; font-family: system-ui,-apple-system,"Segoe UI",sans-serif; }
-    body {
-      margin: 0;
-      background: transparent;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .widget {
-      width: 340px;
-      background: var(--bg);
-      border: 1px solid rgba(0,0,0,0.05);
-      border-radius: 16px;
-      box-shadow: 0 14px 35px rgba(15,23,42,0.05);
-      padding: 18px 18px 10px;
-    }
-    .title {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 14px;
-    }
-    .input {
-      width: 100%;
-      background: #e5e7eb;
-      border: none;
-      outline: none;
-      border-radius: 10px;
-      padding: 9px 11px;
-      font-size: 14px;
-      margin-bottom: 14px;
-    }
-    .task {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.03);
-    }
-    .task:last-child { border-bottom: none; }
-    .task-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-    }
-    .play-btn, .check-icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      border: 1.5px solid #d1d5db;
-      display: grid;
-      place-items: center;
-      background: #fff;
-      cursor: pointer;
-      flex: 0 0 auto;
-    }
-    .play-btn.active {
-      border-color: var(--accent);
-      background: rgba(13,148,136,0.12);
-    }
-    .task-title {
-      font-size: 14px;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: text;
-    }
-    .task-title.done {
-      text-decoration: line-through;
-      color: #9ca3af;
-    }
-    .task-actions {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-    .icon-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 12px;
-      color: #6b7280;
-    }
-    .time {
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      width: 52px;
-      text-align: right;
-      color: #374151;
-    }
-    .settings {
-      margin-top: 12px;
-      background: #f9fafb;
-      border: 1px solid rgba(0,0,0,0.02);
-      border-radius: 12px;
-      padding: 8px 10px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .settings label {
-      font-size: 11px;
-      color: #6b7280;
-    }
-    .settings input {
-      width: 55px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      padding: 3px 5px;
-      font-size: 11px;
-      background: #fff;
-    }
-    .settings small {
-      font-size: 10px;
-      color: #9ca3af;
-    }
-    @media (max-width: 400px) {
-      .widget { width: 100%; }
-    }
+    :root { --bg:#fff; --text:#1f2933; }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;}
+    body{margin:0;background:transparent;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+    .widget{width:340px;background:var(--bg);border:1px solid #000;border-radius:16px;box-shadow:0 14px 35px rgba(15,23,42,.05);padding:18px 18px 10px;display:flex;flex-direction:column;gap:12px;}
+    .title{font-size:18px;font-weight:400;color:var(--text);}
+    .input{width:100%;background:#e5e7eb;border:none;outline:none;border-radius:10px;padding:9px 11px;font-size:14px;}
+    .task{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.1);} .task:last-child{border-bottom:none;}
+    .task-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+    .play-btn{width:22px;height:22px;border-radius:50%;border:1.5px solid #000;display:grid;place-items:center;background:#fff;cursor:pointer;}
+    .play-btn.active{background:rgba(13,148,136,.12);border-color:#0d9488;}
+    .task-title{font-size:14px;color:var(--text);}
+    .task-actions{display:flex;gap:6px;align-items:center;}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:12px;color:#000;}
+    .time{font-weight:600;font-variant-numeric:tabular-nums;width:52px;text-align:right;}
+    .settings{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;border-top:1px solid rgba(0,0,0,.08);padding-top:8px;}
+    .settings input{width:50px;border:1px solid #ccc;border-radius:6px;padding:2px 4px;font-size:12px;text-align:center;}
+    .music-box{border-top:1px solid rgba(0,0,0,.08);padding-top:8px;}
+    .music-title{font-size:12px;color:#555;margin-bottom:4px;}
+    .music-link{display:inline-flex;align-items:center;gap:6px;background:#f2f2f2;padding:8px 12px;border-radius:8px;text-decoration:none;color:#000;font-size:13px;transition:background 0.2s ease;}
+    .music-link:hover{background:#e5e5e5;}
   </style>
 </head>
 <body>
   <div class="widget">
     <div class="title">Pomodoro Timer</div>
     <input id="newTask" class="input" placeholder="Hit Enter to add a task" />
-
     <div id="tasks"></div>
-
     <div class="settings">
-      <label>
-        Focus
-        <input id="focusLength" type="number" min="1" value="25" />m
-      </label>
-      <label>
-        Break
-        <input id="breakLength" type="number" min="1" value="5" />m
-      </label>
-      <small>שינוי הערכים ישפיע על הסשן הבא</small>
+      <label>Focus <input id="focusTime" type="number" value="25" min="1" />m</label>
+      <label>Break <input id="breakTime" type="number" value="5" min="1" />m</label>
+    </div>
+    <div class="music-box">
+      <div class="music-title">🎧 Focus playlist (Apple Music)</div>
+      <a href="https://music.apple.com/il/playlist/work/pl.u-38oWXdeIYzvB2K?l=iw" target="_blank" class="music-link">▶ Open in Apple Music</a>
     </div>
   </div>
-
   <script>
-    const tasksEl = document.getElementById("tasks");
-    const newTaskEl = document.getElementById("newTask");
-    const focusInput = document.getElementById("focusLength");
-    const breakInput = document.getElementById("breakLength");
-
-    const STORAGE_KEY = "notion-pomodoro-v1";
-
-    let state = {
-      tasks: [
-        { id: crypto.randomUUID(), title: "My First Task", done: false, time: 25 * 60 },
-        { id: crypto.randomUUID(), title: "Second Task", done: true, time: 25 * 60 },
-        { id: crypto.randomUUID(), title: "Third Task", done: true, time: 25 * 60 },
-      ],
-      activeTaskId: null,
-      isRunning: false,
-      isBreak: false,
-      focusLen: 25,
-      breakLen: 5,
-      lastTick: null
-    };
-
-    function load() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      try {
-        const saved = JSON.parse(raw);
-        state = {
-          ...state,
-          ...saved,
-          tasks: saved.tasks || state.tasks
-        };
-        focusInput.value = state.focusLen;
-        breakInput.value = state.breakLen;
-      } catch (e) {
-        console.warn("cant parse saved widget", e);
-      }
-    }
-
-    function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        tasks: state.tasks,
-        activeTaskId: state.activeTaskId,
-        isRunning: state.isRunning,
-        isBreak: state.isBreak,
-        focusLen: state.focusLen,
-        breakLen: state.breakLen
-      }));
-    }
-
-    function format(sec) {
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-    }
-
-    function render() {
-      tasksEl.innerHTML = "";
-      state.tasks.forEach(task => {
-        const row = document.createElement("div");
-        row.className = "task";
-
-        const left = document.createElement("div");
-        left.className = "task-left";
-
-        const btn = document.createElement("div");
-        btn.className = state.activeTaskId === task.id && state.isRunning ? "play-btn active" : "play-btn";
-        btn.innerHTML = state.activeTaskId === task.id && state.isRunning ? "❚❚" : "▶";
-        btn.onclick = () => toggleTask(task.id);
-
-        const title = document.createElement("div");
-        title.className = task.done ? "task-title done" : "task-title";
-        title.contentEditable = true;
-        title.textContent = task.title;
-        title.onblur = e => {
-          task.title = e.target.textContent.trim() || "Untitled";
-          save();
-        };
-
-        left.appendChild(btn);
-        left.appendChild(title);
-
-        const actions = document.createElement("div");
-        actions.className = "task-actions";
-
-        const doneBtn = document.createElement("button");
-        doneBtn.className = "icon-btn";
-        doneBtn.textContent = "✓";
-        doneBtn.title = "Mark done";
-        doneBtn.onclick = () => {
-          task.done = !task.done;
-          save();
-          render();
-        };
-
-        const resetBtn = document.createElement("button");
-        resetBtn.className = "icon-btn";
-        resetBtn.textContent = "↻";
-        resetBtn.title = "Reset time";
-        resetBtn.onclick = () => {
-          task.time = state.focusLen * 60;
-          state.isBreak = false;
-          save();
-          render();
-        };
-
-        const delBtn = document.createElement("button");
-        delBtn.className = "icon-btn";
-        delBtn.textContent = "🗑";
-        delBtn.onclick = () => {
-          state.tasks = state.tasks.filter(t => t.id !== task.id);
-          if (state.activeTaskId === task.id) {
-            state.activeTaskId = null;
-            state.isRunning = false;
-          }
-          save();
-          render();
-        };
-
-        const time = document.createElement("div");
-        time.className = "time";
-        time.textContent = format(task.time);
-
-        actions.appendChild(doneBtn);
-        actions.appendChild(resetBtn);
-        actions.appendChild(delBtn);
-        actions.appendChild(time);
-
-        row.appendChild(left);
-        row.appendChild(actions);
-        tasksEl.appendChild(row);
-      });
-    }
-
-    function toggleTask(id) {
-      if (state.activeTaskId === id) {
-        state.isRunning = !state.isRunning;
-      } else {
-        state.activeTaskId = id;
-        state.isRunning = true;
-        state.isBreak = false;
-        const task = state.tasks.find(t => t.id === id);
-        if (task && task.time <= 0) {
-          task.time = state.focusLen * 60;
-        }
-      }
-      state.lastTick = Date.now();
-      save();
-      render();
-    }
-
-    newTaskEl.addEventListener("keydown", e => {
-      if (e.key === "Enter" && newTaskEl.value.trim() !== "") {
-        const t = {
-          id: crypto.randomUUID(),
-          title: newTaskEl.value.trim(),
-          done: false,
-          time: state.focusLen * 60
-        };
-        state.tasks.unshift(t);
-        newTaskEl.value = "";
-        save();
-        render();
-      }
-    });
-
-    focusInput.addEventListener("change", () => {
-      const v = Math.max(1, parseInt(focusInput.value || "25", 10));
-      state.focusLen = v;
-      save();
-    });
-
-    breakInput.addEventListener("change", () => {
-      const v = Math.max(1, parseInt(breakInput.value || "5", 10));
-      state.breakLen = v;
-      save();
-    });
-
-    function tick() {
-      if (!state.isRunning || !state.activeTaskId) {
-        requestAnimationFrame(tick);
-        return;
-      }
-      const now = Date.now();
-      const dt = Math.floor((now - (state.lastTick || now)) / 1000);
-      if (dt > 0) {
-        const task = state.tasks.find(t => t.id === state.activeTaskId);
-        if (task) {
-          task.time = Math.max(0, task.time - dt);
-          if (task.time === 0) {
-            if (!state.isBreak) {
-              state.isBreak = true;
-              task.time = state.breakLen * 60;
-            } else {
-              state.isBreak = false;
-              task.time = state.focusLen * 60;
-              task.done = true;
-              state.isRunning = false;
-            }
-          }
-        }
-        state.lastTick = now;
-        save();
-        render();
-      }
-      requestAnimationFrame(tick);
-    }
-
-    load();
+    const tasksEl=document.getElementById('tasks');
+    const newTaskEl=document.getElementById('newTask');
+    const focusInput=document.getElementById('focusTime');
+    const breakInput=document.getElementById('breakTime');
+    let tasks=[]; let activeTaskId=null; let isRunning=false; let timerInterval=null;
+    function getFocusMinutes(){return Math.max(1,parseInt(focusInput.value)||25);} 
+    function addTask(title){const t={id:crypto.randomUUID(),title,done:false,time:getFocusMinutes()*60};tasks.push(t);render();}
+    function formatTime(s){const m=Math.floor(s/60).toString().padStart(2,'0');const sec=(s%60).toString().padStart(2,'0');return `${m}:${sec}`;}
+    function togglePlayPause(id){if(activeTaskId===id){isRunning=!isRunning;if(isRunning)startTimer();else clearInterval(timerInterval);}else{activeTaskId=id;isRunning=true;startTimer();}render();}
+    function startTimer(){clearInterval(timerInterval);timerInterval=setInterval(()=>{const task=tasks.find(t=>t.id===activeTaskId);if(!task)return;if(task.time>0){task.time--;}else{clearInterval(timerInterval);isRunning=false;task.done=true;}render();},1000);} 
+    function resetTask(id){const t=tasks.find(t=>t.id===id);if(t)t.time=getFocusMinutes()*60;render();}
+    function deleteTask(id){tasks=tasks.filter(t=>t.id!==id);if(activeTaskId===id)clearInterval(timerInterval);render();}
+    function render(){tasksEl.innerHTML='';tasks.forEach(task=>{const row=document.createElement('div');row.className='task';const left=document.createElement('div');left.className='task-left';const play=document.createElement('div');play.className='play-btn';play.innerHTML=activeTaskId===task.id&&isRunning?'❚❚':'▶';play.onclick=()=>togglePlayPause(task.id);const title=document.createElement('div');title.className='task-title';title.textContent=task.title;left.appendChild(play);left.appendChild(title);const actions=document.createElement('div');actions.className='task-actions';const reset=document.createElement('button');reset.className='icon-btn';reset.textContent='↻';reset.onclick=()=>resetTask(task.id);const del=document.createElement('button');del.className='icon-btn';del.textContent='🗑';del.onclick=()=>deleteTask(task.id);const time=document.createElement('div');time.className='time';time.textContent=formatTime(task.time);actions.appendChild(reset);actions.appendChild(del);actions.appendChild(time);row.appendChild(left);row.appendChild(actions);tasksEl.appendChild(row);});}
+    newTaskEl.addEventListener('keydown',e=>{if(e.key==='Enter' && newTaskEl.value.trim()!==''){addTask(newTaskEl.value.trim());newTaskEl.value='';}});
     render();
-    tick();
   </script>
 </body>
 </html>
