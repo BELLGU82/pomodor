@@ -3,19 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pomodoro Timer - Focus Mode</title>
+  <title>Pomodoro Timer - Focus Mode Fixed</title>
   <style>
     :root {
       --bg: #fff;
       --text: #1f2933;
-      --primary: #b3473f;
+      --primary: #6c63ff;
     }
-
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    }
-
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
     body {
       margin: 0;
       background: #f5f5f5;
@@ -24,85 +19,133 @@
       align-items: center;
       min-height: 100vh;
     }
-
     .widget {
-      width: 360px;
+      width: 380px;
       background: var(--bg);
       border: 1px solid #000;
       border-radius: 16px;
-      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 14px 35px rgba(15,23,42,0.05);
       padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-
     .title { font-size: 18px; font-weight: 500; color: var(--text); }
-    .input { width: 100%; background: #e5e7eb; border: none; outline: none; border-radius: 10px; padding: 9px 11px; font-size: 14px; }
-
     .task-list { display: flex; flex-direction: column; gap: 6px; }
-    .task { display: flex; align-items: center; justify-content: space-between; background: #fafafa; border-radius: 8px; padding: 8px 10px; border: 1px solid rgba(0,0,0,0.08); }
-    .task.active { background: var(--primary); color: #fff; }
-    .task-controls { display: flex; gap: 8px; }
+    .task {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fafafa;
+      border-radius: 8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .task.done span { text-decoration: line-through; color: #9ca3af; }
+    .task-controls { display: flex; gap: 6px; }
     .task-btn { background: none; border: none; cursor: pointer; font-size: 14px; }
+    .input {
+      width: 100%;
+      background: #e5e7eb;
+      border: none;
+      outline: none;
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 14px;
+    }
 
-    .focus-screen { display: none; flex-direction: column; align-items: center; justify-content: center; background: var(--primary); border-radius: 12px; color: #fff; padding: 24px 12px; text-align: center; gap: 8px; min-height: 180px; }
-    .focus-screen.active { display: flex; }
-    .focus-title { font-size: 16px; opacity: 0.9; }
-    .focus-timer { font-size: 42px; font-weight: 700; margin: 4px 0; }
+    /* Focus Mode */
+    .focus-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--primary);
+      color: #fff;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 100;
+    }
+    .focus-overlay.active { display: flex; }
+    .focus-title { font-size: 20px; font-weight: 600; }
+    .focus-timer { font-size: 70px; font-weight: 700; letter-spacing: .04em; }
     .focus-controls { display: flex; gap: 20px; }
-    .focus-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; transition: opacity 0.2s; }
-    .focus-btn:hover { opacity: 0.7; }
+    .focus-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+    }
 
-    .music-box, .settings { font-size: 12px; border-top: 1px solid rgba(0, 0, 0, 0.08); padding-top: 8px; }
-    .music-link { color: #1a73e8; text-decoration: none; font-size: 13px; }
-    .settings label { margin-right: 8px; }
-    .settings input { width: 45px; border: 1px solid #ccc; border-radius: 6px; padding: 2px 4px; font-size: 12px; text-align: center; }
+    /* mini player */
+    #musicContainer {
+      width: 150px;
+      min-height: 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+    #musicBtn {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 999px;
+      padding: 4px 12px;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .mini-yt {
+      width: 140px;
+      height: 78px;
+      border: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+      background: #000;
+    }
   </style>
 </head>
 <body>
   <div class="widget">
     <div class="title">Pomodoro Timer</div>
-    <div class="task-list" id="taskList"></div>
+    <div id="taskList" class="task-list"></div>
     <input id="newTask" class="input" placeholder="Add a new task" />
+  </div>
 
-    <div class="focus-screen" id="focusScreen">
-      <div class="focus-title" id="focusTaskTitle">Time to focus!</div>
-      <div class="focus-timer" id="focusTimer">25:00</div>
-      <div class="focus-controls">
-        <button id="focusPlay" class="focus-btn">▶</button>
-        <button id="focusPause" class="focus-btn">❚❚</button>
-      </div>
-      <div id="musicControls" style="display:flex;gap:10px;align-items:center;justify-content:center;margin-top:4px;">
-        <button id="playPlaylist" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.4);border-radius:999px;padding:5px 16px;color:#fff;font-size:12px;cursor:pointer;">▶ Playlist</button>
-        <button id="openPlaylist" style="background:transparent;border:none;color:#fff;font-size:12px;cursor:pointer;">Open</button>
-      </div>
+  <div id="focusOverlay" class="focus-overlay">
+    <div id="focusTaskTitle" class="focus-title">Time to focus!</div>
+    <div id="focusTimer" class="focus-timer">25:00</div>
+    <div class="focus-controls">
+      <button id="focusPlay" class="focus-btn">▶</button>
+      <button id="focusPause" class="focus-btn">❚❚</button>
+      <button id="focusExit" class="focus-btn">✕</button>
     </div>
-
-    <div class="music-box">
-      🎵 <a href="https://youtube.com/playlist?list=PLDhuj9rNT6pkbPaMSKxIcbETHyI0Ofn5X&si=wLFxLirdJ6iTjwUC" target="_blank" class="music-link">Focus Playlist (YouTube)</a>
-    </div>
-
-    <div class="settings">
-      <label>Focus <input id="focusTime" type="number" value="25" min="1" />m</label>
-      <label>Break <input id="breakTime" type="number" value="5" min="1" />m</label>
-      <label>Long <input id="longBreakTime" type="number" value="15" min="1" />m</label>
+    <div id="musicContainer">
+      <button id="musicBtn">▶ playlist</button>
+      <!-- mini iframe goes here -->
     </div>
   </div>
 
   <script>
     const newTaskEl = document.getElementById('newTask');
     const taskListEl = document.getElementById('taskList');
-    const focusScreen = document.getElementById('focusScreen');
+    const focusOverlay = document.getElementById('focusOverlay');
     const focusTaskTitle = document.getElementById('focusTaskTitle');
     const focusTimerEl = document.getElementById('focusTimer');
     const focusPlay = document.getElementById('focusPlay');
     const focusPause = document.getElementById('focusPause');
-    const focusInput = document.getElementById('focusTime');
+    const focusExit = document.getElementById('focusExit');
+    let musicBtn = document.getElementById('musicBtn');
+    const musicContainer = document.getElementById('musicContainer');
+    let isPlayerEmbedded = false;
 
     let tasks = [];
-    let activeTask = null;
+    let activeTaskId = null;
     let remainingSeconds = 0;
+    let totalSeconds = 0;
     let timerInterval = null;
 
     function formatTime(sec) {
@@ -113,85 +156,150 @@
 
     function renderTasks() {
       taskListEl.innerHTML = '';
-      tasks.forEach((t, i) => {
-        const div = document.createElement('div');
-        div.className = 'task';
-        if (t.done) div.style.textDecoration = 'line-through';
+      tasks.forEach((t) => {
+        const row = document.createElement('div');
+        row.className = 'task' + (t.done ? ' done' : '');
         const span = document.createElement('span');
         span.textContent = t.title;
-        div.appendChild(span);
-
-        const controls = document.createElement('div');
-        controls.className = 'task-controls';
+        const ctrls = document.createElement('div');
+        ctrls.className = 'task-controls';
 
         const doneBtn = document.createElement('button');
         doneBtn.className = 'task-btn';
         doneBtn.textContent = '✔';
-        doneBtn.onclick = (e) => { e.stopPropagation(); t.done = !t.done; renderTasks(); };
+        doneBtn.onclick = (e) => {
+          e.stopPropagation();
+          toggleDone(t.id);
+        };
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'task-btn';
-        deleteBtn.textContent = '🗑';
-        deleteBtn.onclick = (e) => { e.stopPropagation(); tasks.splice(i, 1); renderTasks(); };
+        const delBtn = document.createElement('button');
+        delBtn.className = 'task-btn';
+        delBtn.textContent = '🗑';
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteTask(t.id);
+        };
 
         const startBtn = document.createElement('button');
         startBtn.className = 'task-btn';
         startBtn.textContent = '▶';
-        startBtn.onclick = (e) => { e.stopPropagation(); startFocus(t); };
+        startBtn.onclick = (e) => {
+          e.stopPropagation();
+          startSession(t.id);
+        };
 
-        controls.append(doneBtn, deleteBtn, startBtn);
-        div.appendChild(controls);
-
-        taskListEl.appendChild(div);
+        ctrls.append(doneBtn, delBtn, startBtn);
+        row.append(span, ctrls);
+        taskListEl.appendChild(row);
       });
     }
 
-    function startFocus(task) {
-      activeTask = task;
-      remainingSeconds = parseInt(focusInput.value) * 60;
-      focusTaskTitle.textContent = task.title || 'Time to focus!';
-      focusTimerEl.textContent = formatTime(remainingSeconds);
-      focusScreen.classList.add('active');
-    }
-
-    function startTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        if (remainingSeconds > 0) {
-          remainingSeconds--;
-          focusTimerEl.textContent = formatTime(remainingSeconds);
-        } else {
-          clearInterval(timerInterval);
-          endSession();
-        }
-      }, 1000);
-    }
-
-    function endSession() {
-      if (activeTask) activeTask.done = true;
+    function addTask(title) {
+      tasks.push({ id: crypto.randomUUID(), title, done: false });
       renderTasks();
-      focusScreen.classList.remove('active');
-      alert('Focus session complete! Take a break.');
     }
 
-    focusPlay.onclick = startTimer;
-    focusPause.onclick = () => clearInterval(timerInterval);
+    function toggleDone(id) {
+      const t = tasks.find((x) => x.id === id);
+      if (t) t.done = !t.done;
+      if (id === activeTaskId) {
+        stopTimer();
+        exitFocus();
+      }
+      renderTasks();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter((x) => x.id !== id);
+      if (id === activeTaskId) {
+        stopTimer();
+        exitFocus();
+      }
+      renderTasks();
+    }
+
+    function startSession(id) {
+      activeTaskId = id;
+      const t = tasks.find((x) => x.id === id);
+      if (!t) return;
+      totalSeconds = remainingSeconds = 25 * 60;
+      focusTaskTitle.textContent = t.title;
+      focusTimerEl.textContent = formatTime(remainingSeconds);
+      focusOverlay.classList.add('active');
+
+      // reset tiny player
+      isPlayerEmbedded = false;
+      musicContainer.innerHTML = `<button id="musicBtn" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.4);border-radius:999px;padding:4px 12px;color:#fff;font-size:12px;cursor:pointer;">▶ playlist</button>`;
+      musicBtn = document.getElementById('musicBtn');
+      musicBtn.addEventListener('click', embedPlaylist);
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    function exitFocus() {
+      stopTimer();
+      focusOverlay.classList.remove('active');
+      activeTaskId = null;
+    }
+
+    function tick() {
+      if (remainingSeconds > 0) {
+        remainingSeconds--;
+        focusTimerEl.textContent = formatTime(remainingSeconds);
+      } else {
+        stopTimer();
+        finishSession();
+      }
+    }
+
+    function finishSession() {
+      const t = tasks.find((x) => x.id === activeTaskId);
+      if (t) t.done = true;
+      renderTasks();
+      exitFocus();
+      alert('Focus session complete!');
+    }
+
+    focusPlay.onclick = () => {
+      if (!activeTaskId) return;
+      stopTimer();
+      timerInterval = setInterval(tick, 1000);
+    };
+    focusPause.onclick = () => {
+      stopTimer();
+    };
+    focusExit.onclick = () => {
+      exitFocus();
+    };
 
     newTaskEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && newTaskEl.value.trim()) {
-        tasks.push({ title: newTaskEl.value.trim(), done: false });
+        addTask(newTaskEl.value.trim());
         newTaskEl.value = '';
-        renderTasks();
       }
     });
 
     renderTasks();
 
-    const YT_PLAYLIST = "https://youtube.com/playlist?list=PLDhuj9rNT6pkbPaMSKxIcbETHyI0Ofn5X&si=wLFxLirdJ6iTjwUC";
-    const playPlaylist = document.getElementById('playPlaylist');
-    const openPlaylist = document.getElementById('openPlaylist');
-    if (playPlaylist) playPlaylist.addEventListener('click', () => window.open(YT_PLAYLIST, '_blank'));
-    if (openPlaylist) openPlaylist.addEventListener('click', () => window.open(YT_PLAYLIST, '_blank'));
+    function embedPlaylist() {
+      if (isPlayerEmbedded) return;
+      isPlayerEmbedded = true;
+      const playlistID = "PLDhuj9rNT6pkbPaMSKxIcbETHyI0Ofn5X";
+      const iframeSrc = `https://www.youtube.com/embed/videoseries?list=${playlistID}&autoplay=1`;
+      musicContainer.innerHTML = `
+        <iframe
+          src="${iframeSrc}"
+          class="mini-yt"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+        ></iframe>
+      `;
+    }
+
+    if (musicBtn) musicBtn.addEventListener('click', embedPlaylist);
   </script>
 </body>
 </html>
