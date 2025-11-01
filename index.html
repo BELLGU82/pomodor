@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pomodoro Timer - Focus Mode Fixed</title>
+  <title>Pomodoro Timer - Focus Mode</title>
   <style>
     :root {
       --bg: #fff;
@@ -28,7 +28,7 @@
       padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
     .title { font-size: 18px; font-weight: 500; color: var(--text); }
     .task-list { display: flex; flex-direction: column; gap: 6px; }
@@ -52,6 +52,30 @@
       border-radius: 10px;
       padding: 9px 11px;
       font-size: 14px;
+    }
+
+    /* manual settings */
+    .settings {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      padding-top: 6px;
+      flex-wrap: wrap;
+    }
+    .settings label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .settings input {
+      width: 46px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 2px 4px;
+      text-align: center;
+      font-size: 12px;
     }
 
     /* Focus Mode */
@@ -113,6 +137,13 @@
     <div class="title">Pomodoro Timer</div>
     <div id="taskList" class="task-list"></div>
     <input id="newTask" class="input" placeholder="Add a new task" />
+
+    <!-- manual time settings -->
+    <div class="settings">
+      <label>Focus <input id="focusInput" type="number" value="25" min="1" /></label>
+      <label>Break <input id="breakInput" type="number" value="5" min="1" /></label>
+      <label>Long <input id="longInput" type="number" value="15" min="1" /></label>
+    </div>
   </div>
 
   <div id="focusOverlay" class="focus-overlay">
@@ -125,7 +156,6 @@
     </div>
     <div id="musicContainer">
       <button id="musicBtn">▶ playlist</button>
-      <!-- mini iframe goes here -->
     </div>
   </div>
 
@@ -138,6 +168,12 @@
     const focusPlay = document.getElementById('focusPlay');
     const focusPause = document.getElementById('focusPause');
     const focusExit = document.getElementById('focusExit');
+
+    // manual inputs
+    const focusInput = document.getElementById('focusInput');
+    const breakInput = document.getElementById('breakInput');
+    const longInput = document.getElementById('longInput');
+
     let musicBtn = document.getElementById('musicBtn');
     const musicContainer = document.getElementById('musicContainer');
     let isPlayerEmbedded = false;
@@ -167,26 +203,17 @@
         const doneBtn = document.createElement('button');
         doneBtn.className = 'task-btn';
         doneBtn.textContent = '✔';
-        doneBtn.onclick = (e) => {
-          e.stopPropagation();
-          toggleDone(t.id);
-        };
+        doneBtn.onclick = (e) => { e.stopPropagation(); toggleDone(t.id); };
 
         const delBtn = document.createElement('button');
         delBtn.className = 'task-btn';
         delBtn.textContent = '🗑';
-        delBtn.onclick = (e) => {
-          e.stopPropagation();
-          deleteTask(t.id);
-        };
+        delBtn.onclick = (e) => { e.stopPropagation(); deleteTask(t.id); };
 
         const startBtn = document.createElement('button');
         startBtn.className = 'task-btn';
         startBtn.textContent = '▶';
-        startBtn.onclick = (e) => {
-          e.stopPropagation();
-          startSession(t.id);
-        };
+        startBtn.onclick = (e) => { e.stopPropagation(); startSession(t.id); };
 
         ctrls.append(doneBtn, delBtn, startBtn);
         row.append(span, ctrls);
@@ -222,12 +249,16 @@
       activeTaskId = id;
       const t = tasks.find((x) => x.id === id);
       if (!t) return;
-      totalSeconds = remainingSeconds = 25 * 60;
+
+      // take value from manual focus input
+      const focusMinutes = Math.max(1, parseInt(focusInput.value) || 25);
+      totalSeconds = remainingSeconds = focusMinutes * 60;
+
       focusTaskTitle.textContent = t.title;
       focusTimerEl.textContent = formatTime(remainingSeconds);
       focusOverlay.classList.add('active');
 
-      // reset tiny player
+      // reset tiny player per session
       isPlayerEmbedded = false;
       musicContainer.innerHTML = `<button id="musicBtn" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.4);border-radius:999px;padding:4px 12px;color:#fff;font-size:12px;cursor:pointer;">▶ playlist</button>`;
       musicBtn = document.getElementById('musicBtn');
@@ -268,12 +299,8 @@
       stopTimer();
       timerInterval = setInterval(tick, 1000);
     };
-    focusPause.onclick = () => {
-      stopTimer();
-    };
-    focusExit.onclick = () => {
-      exitFocus();
-    };
+    focusPause.onclick = () => { stopTimer(); };
+    focusExit.onclick = () => { exitFocus(); };
 
     newTaskEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && newTaskEl.value.trim()) {
