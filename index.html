@@ -1,482 +1,173 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pomodoro Timer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <style>
-        :root {
-            --bg-color: #eef0f4;
-            --primary-text-color: #313131;
-            --secondary-text-color: #8a8a8a;
-            --shadow-light: #ffffff;
-            --shadow-dark: #d1d9e6;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pomodoro Timer - Focus Mode Fixed</title>
+  <style>
+    :root {
+      --bg: #fff;
+      --text: #1f2933;
+      --primary: #6c63ff;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    body { margin: 0; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .widget { width: 380px; background: var(--bg); border: 1px solid #000; border-radius: 16px; box-shadow: 0 14px 35px rgba(15,23,42,0.05); padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+    .title { font-size: 18px; font-weight: 500; color: var(--text); }
+    .task-list { display: flex; flex-direction: column; gap: 6px; }
+    .task { display: flex; align-items: center; justify-content: space-between; background: #fafafa; border-radius: 8px; padding: 8px 10px; border: 1px solid rgba(0,0,0,0.08); }
+    .task.done span { text-decoration: line-through; color: #9ca3af; }
+    .task-controls { display: flex; gap: 6px; }
+    .task-btn { background: none; border: none; cursor: pointer; font-size: 14px; }
+    .input { width: 100%; background: #e5e7eb; border: none; outline: none; border-radius: 10px; padding: 9px 11px; font-size: 14px; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: transparent;
-            color: var(--primary-text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            /* הוספת כיוון טקסט למרכז במסכים צרים */
-            text-align: center;
-        }
-
-        .neumorphism-card {
-            width: 100%;
-            max-width: 220px;
-            min-width: 160px;
-            padding: 18px;
-            background-color: #eef0f4;
-            border-radius: 24px;
-            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            align-items: center; /* מרכז את כל הרכיבים בכרטיס */
-            justify-content: center; /* מרכז אנכית בתוך הכרטיס */
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background-color: var(--bg-color);
-            border-radius: 16px;
-            box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
-            gap: 30px; /* ריווח בין הפריטים */
-        }
-
-        .time-date {
-            font-size: 14px;
-            font-weight: 400;
-            line-height: 1.2;
-        }
-
-        .task-name {
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .icon-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background-color: var(--bg-color);
-            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .icon-btn:active {
-            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
-            transform: scale(0.95);
-        }
-
-        .icon-btn i {
-            font-size: 14px;
-            color: var(--primary-text-color);
-        }
-
-        .main-content {
-            display: flex;
-            gap: 10px;
-        }
-
-        .timer-container {
-            width: 120px;
-            height: 120px;
-            flex-grow: 0.4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: var(--bg-color);
-            border-radius: 50%;
-            box-shadow: inset 7px 7px 14px var(--shadow-dark), inset -7px -7px 14px var(--shadow-light);
-            aspect-ratio: 1 / 1;
-        }
-
-        .timer-display {
-            font-size: 24px;
-            font-weight: 500;
-            letter-spacing: 2px;
-        }
-
-        .right-panel {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            gap: 6px;
-            width: 80px;
-        }
-
-        .music-widget {
-            background-color: var(--bg-color);
-            border-radius: 16px;
-            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
-            padding: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            height: 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .music-widget:active:not(.player-embedded) {
-            transform: scale(0.98);
-            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
-        }
-        
-        .music-widget.player-embedded {
-            padding: 0;
-            cursor: default;
-        }
-
-        .music-artwork {
-            width: 100%;
-            height: 60px;
-            background: #313131 url('https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault.jpg?sqp=-oaymwEXCNACELwBSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLBw5uO5g_yQaj9aZk5zJzJzJzJz') center/cover;
-            border-radius: 10px;
-            margin: 0 auto 6px;
-        }
-
-        .music-title {
-            font-size: 10px;
-            font-weight: 300;
-        }
-
-        .main-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--bg-color);
-            border-radius: 24px;
-            padding: 4px;
-            /* ניאומורפי שקוע */
-            box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
-        }
-
-        .control-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .control-btn:active {
-            transform: scale(0.9);
-        }
-
-        .control-btn.play-pause {
-            background-color: var(--primary-text-color);
-        }
-        
-        .control-btn.play-pause i {
-            color: var(--bg-color);
-            font-size: 18px;
-        }
-        
-        .control-btn.reset i {
-            font-size: 18px;
-        }
-
-        /* Modals */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
-        .modal-content {
-            width: 90%;
-            max-width: 160px;
-            padding: 16px;
-            background-color: var(--bg-color);
-            border-radius: 12px;
-            box-shadow: 3px 3px 8px var(--shadow-dark), -3px -3px 8px var(--shadow-light);
-            text-align: center;
-            font-size: 11px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content h2 {
-            margin-top: 0;
-            font-size: 11px;
-        }
-        .modal-content p {
-            color: var(--secondary-text-color);
-            margin-bottom: 8px;
-            font-size: 11px;
-        }
-        .settings-group .setting-option { margin-bottom: 8px; text-align: right; }
-        .setting-option label { font-size: 11px; cursor: pointer; }
-        .modal-buttons { display: flex; gap: 8px; justify-content: center; }
-        .modal-btn {
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 11px;
-            font-weight: 500;
-            cursor: pointer;
-            background-color: var(--bg-color);
-            box-shadow: none;
-            transition: all 0.2s ease-in-out;
-        }
-        .modal-btn:active { box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light); transform: scale(0.95); }
-        .modal-btn.primary {
-            background-color: var(--bg-color);
-            color: var(--primary-text-color);
-            box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
-            font-weight: 300;
-        }
-        .settings-group input[type="radio"] {
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--bg-color);
-            box-shadow: 3px 3px 8px var(--shadow-dark), -3px -3px 8px var(--shadow-light);
-            margin-left: 6px;
-            vertical-align: middle;
-            transition: box-shadow 0.2s, border 0.2s;
-            cursor: pointer;
-            position: relative;
-        }
-        .settings-group input[type="radio"]:checked {
-            box-shadow: 1px 1px 4px var(--shadow-dark), -1px -1px 4px var(--shadow-light), 0 0 0 2px #d1d9e633;
-        }
-        .settings-group input[type="radio"]:active {
-            box-shadow: inset 1px 1px 4px var(--shadow-dark), inset -1px -1px 4px var(--shadow-light);
-        }
-        .settings-group .setting-option label {
-            font-size: 11px;
-            cursor: pointer;
-            padding-right: 4px;
-            user-select: none;
-            transition: color 0.2s;
-        }
-    </style>
+    /* Focus Mode */
+    .focus-overlay { display: none; position: fixed; inset: 0; background: var(--primary); color: #fff; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 100; }
+    .focus-overlay.active { display: flex; }
+    .focus-title { font-size: 20px; font-weight: 600; }
+    .focus-timer { font-size: 70px; font-weight: 700; letter-spacing: .04em; }
+    .focus-controls { display: flex; gap: 20px; }
+    .focus-btn { background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; }
+    iframe { border: none; border-radius: 12px; }
+    .music-player { width: 360px; height: 220px; }
+  </style>
 </head>
 <body>
+  <div class="widget">
+    <div class="title">Pomodoro Timer</div>
+    <div id="taskList" class="task-list"></div>
+    <input id="newTask" class="input" placeholder="Add a new task" />
+  </div>
 
-    <div class="neumorphism-card">
-        <div class="header">
-            <div id="time-display" class="time-date">18:00</div>
-            <!-- CHANGE 3: "Task" instead of "Project" -->
-            <div class="task-name" contenteditable="true">שם המשימה</div>
-            <div class="header-icons">
-                <div class="icon-btn" id="settings-btn">
-                    <i class='bx bx-slider-alt'></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="timer-container">
-                <div id="timer-display" class="timer-display">30:00</div>
-            </div>
-            <div class="right-panel">
-                <div class="music-widget" id="music-widget">
-                    <!-- This content will be replaced by the iframe on click -->
-                    <div class="music-artwork"></div>
-                </div>
-                <div class="main-controls">
-                    <div class="control-btn reset" id="reset-btn">
-                        <i class='bx bx-stop'></i>
-                    </div>
-                    <div class="control-btn play-pause" id="play-pause-btn">
-                        <i class='bx bx-play' id="play-pause-icon"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div id="focusOverlay" class="focus-overlay">
+    <div id="focusTaskTitle" class="focus-title">Time to focus!</div>
+    <div id="focusTimer" class="focus-timer">25:00</div>
+    <div class="focus-controls">
+      <button id="focusPlay" class="focus-btn">▶</button>
+      <button id="focusPause" class="focus-btn">❚❚</button>
+      <button id="focusExit" class="focus-btn">✕</button>
     </div>
+    <!-- Fixed YouTube playlist embed -->
+    <div id="musicContainer" style="width:360px;min-height:60px;display:flex;flex-direction:column;gap:8px;align-items:center;">
+  <button id="musicBtn" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.5);border-radius:10px;padding:6px 14px;color:#fff;font-size:13px;cursor:pointer;">▶ Play focus playlist</button>
+  <!-- iframe will be injected here on click -->
+</div>
+  </div>
 
-    <!-- Modals (no changes here) -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <h2>עבודה/הפסקה</h2>
-            <div class="settings-group">
-                <div class="setting-option">
-                    <input type="radio" id="sprint" name="pomodoro_mode" value="sprint" checked>
-                    <label for="sprint"><b>ספרינט:</b> 30 דק' = 5 דק'</label>
-                </div>
-                <div class="setting-option">
-                    <input type="radio" id="focus" name="pomodoro_mode" value="focus">
-                    <label for="focus"><b>פוקוס:</b> 60 דק' = 15 דק'</label>
-                </div>
-                <div class="setting-option">
-                    <input type="radio" id="deep" name="pomodoro_mode" value="deep">
-                    <label for="deep"><b>דיפ:</b> 90 דק' = 25 דק'</label>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button id="save-settings-btn" class="modal-btn primary">שמור</button>
-            </div>
-        </div>
-    </div>
-    <div id="recommendation-modal" class="modal">
-        <div class="modal-content">
-            <h2>זמן להפסקה!</h2>
-            <p>הנה המלצה קטנה בשבילך:</p>
-            <h3 id="recommendation-title"></h3>
-            <div class="modal-buttons">
-                <button id="close-rec-btn" class="modal-btn">סגור</button>
-                <a href="#" id="open-rec-link" target="_blank" class="modal-btn primary">פתח קישור</a>
-            </div>
-        </div>
-    </div>
+  <script>
+    const newTaskEl = document.getElementById('newTask');
+    const taskListEl = document.getElementById('taskList');
+    const focusOverlay = document.getElementById('focusOverlay');
+    const focusTaskTitle = document.getElementById('focusTaskTitle');
+    const focusTimerEl = document.getElementById('focusTimer');
+    const focusPlay = document.getElementById('focusPlay');
+    const focusPause = document.getElementById('focusPause');
+    const focusExit = document.getElementById('focusExit');
+const musicBtn = document.getElementById('musicBtn');
+const musicContainer = document.getElementById('musicContainer');
+let isPlayerEmbedded = false;
 
-    <script>
-        const timerDisplay = document.getElementById('timer-display');
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const playPauseIcon = document.getElementById('play-pause-icon');
-        const resetBtn = document.getElementById('reset-btn');
-        const settingsBtn = document.getElementById('settings-btn');
-        const settingsModal = document.getElementById('settings-modal');
-        const saveSettingsBtn = document.getElementById('save-settings-btn');
-        const recommendationModal = document.getElementById('recommendation-modal');
-        const recommendationTitle = document.getElementById('recommendation-title');
-        const openRecLink = document.getElementById('open-rec-link');
-        const closeRecBtn = document.getElementById('close-rec-btn');
-        const timeDisplay = document.getElementById('time-display');
-        const musicWidget = document.getElementById('music-widget');
+    let tasks = [];
+    let activeTaskId = null;
+    let remainingSeconds = 0;
+    let totalSeconds = 0;
+    let timerInterval = null;
 
-        const links = {
-            break_5: ["https://www.youtube.com/watch?v=p39GdEUxxAk", "https://www.youtube.com/watch?v=4C-gxOE0j7s", "https://www.youtube.com/watch?v=zMXTf0G7XCY", "https://www.youtube.com/watch?v=oN8xV3Kb5-Q", "https://www.youtube.com/watch?v=w2Mi0a5dDhc"],
-            break_15: ["https://www.youtube.com/watch?v=-9KLB2HI9BI", "https://www.youtube.com/watch?v=vj0JDwQLof4", "https://www.youtube.com/watch?v=ausxoXBrmWs", "https://www.youtube.com/watch?v=NVPrxcR_RZI"],
-            break_25: ["https://www.youtube.com/watch?v=MaQ7LZcS2ig", "https://www.youtube.com/watch?v=ScxPABG7QJk", "https://www.youtube.com/watch?v=9dv_ETcGnKI", "https://www.youtube.com/watch?v=nIb2LbqHtY4", "https://www.youtube.com/watch?v=N5hFNoRcMVU", "https://www.youtube.com/watch?v=8LPKsSrRhyo", "https://www.youtube.com/watch?v=O4d7u7SikyA", "https://www.youtube.com/watch?v=yqeirBfn2j4", "https://www.youtube.com/watch?v=g_tea8ZNk5A"]
-        };
-        const pomodoroModes = {
-            sprint: { work: 30, break: 5 },
-            focus: { work: 60, break: 15 },
-            deep: { work: 90, break: 25 }
-        };
+    function formatTime(sec){
+      const m=Math.floor(sec/60).toString().padStart(2,'0');
+      const s=(sec%60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
 
-        let currentMode = 'work', activeSetting = 'sprint', timeLeft, timerInterval = null, isRunning = false, isPlayerEmbedded = false;
-        const notificationSound = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3');
+    function renderTasks(){
+      taskListEl.innerHTML='';
+      tasks.forEach((t)=>{
+        const row=document.createElement('div');
+        row.className='task'+(t.done?' done':'');
+        const span=document.createElement('span');
+        span.textContent=t.title;
+        const ctrls=document.createElement('div');
+        ctrls.className='task-controls';
 
-        function updateDateTime() {
-            const now = new Date();
-            // --- CHANGE 1: 24-Hour Clock ---
-            const time = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-            timeDisplay.textContent = time;
-        }
+        const doneBtn=document.createElement('button');
+        doneBtn.className='task-btn';
+        doneBtn.textContent='✔';
+        doneBtn.onclick=(e)=>{e.stopPropagation(); toggleDone(t.id);};
 
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            document.title = `${timerDisplay.textContent} - Pomodoro`;
-        }
+        const delBtn=document.createElement('button');
+        delBtn.className='task-btn';
+        delBtn.textContent='🗑';
+        delBtn.onclick=(e)=>{e.stopPropagation(); deleteTask(t.id);};
 
-        function startTimer() {
-            if (isRunning) return;
-            isRunning = true;
-            playPauseIcon.className = 'bx bx-pause';
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    notificationSound.play();
-                    switchMode();
-                }
-            }, 1000);
-        }
+        const startBtn=document.createElement('button');
+        startBtn.className='task-btn';
+        startBtn.textContent='▶';
+        startBtn.onclick=(e)=>{e.stopPropagation(); startSession(t.id);};
 
-        function pauseTimer() {
-            if (!isRunning) return;
-            isRunning = false;
-            playPauseIcon.className = 'bx bx-play';
-            clearInterval(timerInterval);
-        }
+        ctrls.append(doneBtn, delBtn, startBtn);
+        row.append(span, ctrls);
+        taskListEl.appendChild(row);
+      });
+    }
 
-        function resetTimer() {
-            pauseTimer();
-            currentMode = 'work';
-            timeLeft = pomodoroModes[activeSetting].work * 60;
-            updateTimerDisplay();
-        }
+    function addTask(title){ tasks.push({id:crypto.randomUUID(), title, done:false}); renderTasks(); }
+    function toggleDone(id){ const t=tasks.find(x=>x.id===id); if(t) t.done=!t.done; if(id===activeTaskId){ stopTimer(); exitFocus(); } renderTasks(); }
+    function deleteTask(id){ tasks=tasks.filter(x=>x.id!==id); if(id===activeTaskId){ stopTimer(); exitFocus(); } renderTasks(); }
 
-        function switchMode() {
-            pauseTimer();
-            const settings = pomodoroModes[activeSetting];
-            if (currentMode === 'work') {
-                currentMode = 'break';
-                timeLeft = settings.break * 60;
-                showRecommendation(settings.break);
-            } else {
-                currentMode = 'work';
-                timeLeft = settings.work * 60;
-            }
-            updateTimerDisplay();
-            setTimeout(startTimer, 1000);
-        }
-        
-        function showRecommendation(breakDuration) {
-            let linkList, title;
-            if (breakDuration === 5) { linkList = links.break_5; title = "המלצה להפסקה של 5 דקות"; }
-            else if (breakDuration === 15) { linkList = links.break_15; title = "המלצה להפסקה של 15 דקות"; }
-            else { linkList = links.break_25; title = "המלצה להפסקה של 25 דקות"; }
-            const randomLink = linkList[Math.floor(Math.random() * linkList.length)];
-            recommendationTitle.textContent = title;
-            openRecLink.href = randomLink;
-            recommendationModal.style.display = 'flex';
-        }
+    function startSession(id){
+      activeTaskId=id;
+      const t=tasks.find(x=>x.id===id); if(!t) return;
+      totalSeconds=remainingSeconds=25*60;
+      focusTaskTitle.textContent=t.title;
+      focusTimerEl.textContent=formatTime(remainingSeconds);
+      focusOverlay.classList.add('active');
+      // reset music state per session
+      isPlayerEmbedded = false;
+      if (musicContainer) musicContainer.innerHTML = `<button id="musicBtn" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.5);border-radius:10px;padding:6px 14px;color:#fff;font-size:13px;cursor:pointer;">▶ Play focus playlist</button>`;
+      // rebind btn after reset
+      setTimeout(()=>{
+        const btn = document.getElementById('musicBtn');
+        if (btn) btn.addEventListener('click', embedPlaylist);
+      },0);
+    }
 
-        function applySettings() {
-            activeSetting = document.querySelector('input[name="pomodoro_mode"]:checked').value;
-            settingsModal.style.display = 'none';
-            resetTimer();
-        }
+    function stopTimer(){ if(timerInterval) clearInterval(timerInterval); timerInterval=null; }
+    function exitFocus(){ stopTimer(); focusOverlay.classList.remove('active'); activeTaskId=null; }
 
-        // --- CHANGE 5: Function to embed YouTube player ---
-        function embedPlaylist() {
-            if (isPlayerEmbedded) return;
-            isPlayerEmbedded = true;
-            const playlistID = "PLDhuj9rNT6pkbPaMSKxIcbETHyI0Ofn5X";
-            const iframeSrc = `https://www.youtube.com/embed/videoseries?list=${playlistID}&autoplay=1`;
-            musicWidget.innerHTML = `<iframe src="${iframeSrc}" style="width:100%; height:100%; border:0; border-radius: 25px;" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-            musicWidget.classList.add('player-embedded');
-        }
+    function tick(){
+      if(remainingSeconds>0){
+        remainingSeconds--;
+        focusTimerEl.textContent=formatTime(remainingSeconds);
+      } else {
+        stopTimer();
+        finishSession();
+      }
+    }
 
-        playPauseBtn.addEventListener('click', () => isRunning ? pauseTimer() : startTimer());
-        resetBtn.addEventListener('click', () => { if (confirm('האם לאפס את הטיימר?')) resetTimer(); });
-        settingsBtn.addEventListener('click', () => { settingsModal.style.display = 'flex'; });
-        saveSettingsBtn.addEventListener('click', applySettings);
-        closeRecBtn.addEventListener('click', () => { recommendationModal.style.display = 'none'; });
-        musicWidget.addEventListener('click', embedPlaylist);
-        
-        window.addEventListener('click', (event) => {
-            if (event.target == settingsModal) settingsModal.style.display = 'none';
-            if (event.target == recommendationModal) recommendationModal.style.display = 'none';
-        });
+    function finishSession(){
+      const t=tasks.find(x=>x.id===activeTaskId);
+      if(t) t.done=true;
+      renderTasks();
+      exitFocus();
+      alert('Focus session complete!');
+    }
 
-        function init() {
-            updateDateTime();
-            setInterval(updateDateTime, 10000);
-            applySettings();
-        }
+    focusPlay.onclick=()=>{ if(!activeTaskId) return; stopTimer(); timerInterval=setInterval(tick,1000); };
+    focusPause.onclick=()=>{ stopTimer(); };
+    focusExit.onclick=()=>{ exitFocus(); };
 
-        init();
-    </script>
+    newTaskEl.addEventListener('keydown',(e)=>{ if(e.key==='Enter' && newTaskEl.value.trim()){ addTask(newTaskEl.value.trim()); newTaskEl.value=''; }});
+
+    renderTasks();
+
+    function embedPlaylist(){
+      if (isPlayerEmbedded) return;
+      isPlayerEmbedded = true;
+      const playlistID = "PLDhuj9rNT6pkbPaMSKxIcbETHyI0Ofn5X";
+      const iframeSrc = `https://www.youtube.com/embed/videoseries?list=${playlistID}&autoplay=1`;
+      musicContainer.innerHTML = `<iframe src="${iframeSrc}" style="width:100%;height:220px;border:0;border-radius:12px;" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    }
+    if (musicBtn) musicBtn.addEventListener('click', embedPlaylist);
+  </script>
 </body>
 </html>
